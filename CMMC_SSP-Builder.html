@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMMC SSP Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3182ce;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2c5282;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #3182ce;
+            border: 1px solid #3182ce;
+        }
+        
+        .btn-secondary:hover {
+            background: #ebf8ff;
+        }
+        
+        .btn-success {
+            background: #38a169;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #2f855a;
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .section-description {
+            color: #718096;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .prompt {
+            display: block;
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 8px;
+            font-weight: normal;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        textarea.large {
+            min-height: 150px;
+        }
+        
+        .output-section {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .output-section h2 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .output-content {
+            background: #2d3748;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+        
+        .client-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #ebf8ff;
+            border-radius: 6px;
+            border: 1px solid #bee3f8;
+        }
+        
+        .client-selector label {
+            margin-right: 10px;
+        }
+        
+        .client-selector input {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CMMC System Security Plan Builder</h1>
+            <p class="subtitle">Structured questionnaire format for efficient SSP documentation</p>
+        </header>
+        
+        <div class="client-selector">
+            <label for="clientName"><strong>Client/Project Name:</strong></label>
+            <input type="text" id="clientName" placeholder="Enter client name to save/load data" />
+            <button class="btn btn-secondary" onclick="loadClient()">Load</button>
+            <button class="btn btn-secondary" onclick="saveClient()">Save Progress</button>
+        </div>
+        
+        <div id="successAlert" class="alert alert-success hidden">
+            Progress saved successfully!
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-success" onclick="generateOutput()">Generate SSP Output</button>
+            <button class="btn btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+            <button class="btn btn-secondary" onclick="downloadOutput()">Download as Text</button>
+            <button class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+        </div>
+
+        <!-- Section 1: System Identification -->
+        <div class="section">
+            <h2>1. System Identification</h2>
+            <p class="section-description">Basic identifying information about the system</p>
+            
+            <div class="form-group">
+                <label for="systemName">System Name
+                    <span class="prompt">Official name of the information system</span>
+                </label>
+                <input type="text" id="systemName" placeholder="e.g., Customer Relationship Management System" />
+            </div>
+            
+            <div class="form-group">
+                <label for="systemAcronym">System Acronym
+                    <span class="prompt">Short abbreviation (if applicable)</span>
+                </label>
+                <input type="text" id="systemAcronym" placeholder="e.g., CRMS" />
+            </div>
+            
+            <div class="grid">
+                <div class="form-group">
+                    <label for="cmcmLevel">Target CMMC Level
+                        <span class="prompt">Level 1, 2, or 3</span>
+                    </label>
+                    <input type="text" id="cmcmLevel" placeholder="e.g., Level 2" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="systemOwner">System Owner
+                        <span class="prompt">Name and title of responsible party</span>
+                    </label>
+                    <input type="text" id="systemOwner" placeholder="e.g., John Smith, IT Director" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: System Description -->
+        <div class="section">
+            <h2>2. System Description & Purpose</h2>
+            <p class="section-description">What the system does and why it exists</p>
+            
+            <div class="form-group">
+                <label for="businessPurpose">Business Purpose
+                    <span class="prompt">What business function does this system serve? What problem does it solve?</span>
+                </label>
+                <textarea id="businessPurpose" class="large" placeholder="Describe the primary business purpose, the mission/function it supports, and who the key users are..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="systemCapabilities">System Capabilities
+                    <span class="prompt">What are the major functions and features of this system?</span>
+                </label>
+                <textarea id="systemCapabilities" placeholder="List key capabilities like data processing, storage, communication features, integrations..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="cuiHandled">CUI Handled
+                    <span class="prompt">What types of Controlled Unclassified Information does this system process, store, or transmit?</span>
+                </label>
+                <textarea id="cuiHandled" placeholder="Describe the specific types of CUI (e.g., technical data, contract performance information, export controlled data)..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 3: System Environment -->
+        <div class="section">
+            <h2>3. System Environment & Architecture</h2>
+            <p class="section-description">Technical infrastructure and hosting details</p>
+            
+            <div class="form-group">
+                <label for="hostingModel">Hosting Model
+                    <span class="prompt">Where is the system hosted? (On-premises, cloud, hybrid, etc.)</span>
+                </label>
+                <textarea id="hostingModel" placeholder="Describe hosting environment, cloud provider(s), data center locations..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="majorComponents">Major System Components
+                    <span class="prompt">What are the key hardware/software components? (servers, databases, applications, network devices)</span>
+                </label>
+                <textarea id="majorComponents" class="large" placeholder="List major components including: servers, workstations, network infrastructure, databases, applications, security tools..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="operatingSystems">Operating Systems & Platforms
+                    <span class="prompt">What OS and platforms are in use?</span>
+                </label>
+                <textarea id="operatingSystems" placeholder="e.g., Windows Server 2019, Ubuntu 22.04, macOS, iOS/Android for mobile..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="networkArchitecture">Network Architecture
+                    <span class="prompt">Describe the network topology, segmentation, and security zones</span>
+                </label>
+                <textarea id="networkArchitecture" class="large" placeholder="Describe network segments, VLANs, DMZ, security zones, firewalls, network isolation strategy..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 4: System Boundaries -->
+        <div class="section">
+            <h2>4. System Boundaries & Scope</h2>
+            <p class="section-description">What's included and excluded from the authorization boundary</p>
+            
+            <div class="form-group">
+                <label for="authBoundary">Authorization Boundary
+                    <span class="prompt">What components, networks, and systems are INSIDE the boundary?</span>
+                </label>
+                <textarea id="authBoundary" class="large" placeholder="Clearly define what's in scope - specific servers, applications, network segments, endpoints that process/store CUI..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="outOfScope">Out of Scope
+                    <span class="prompt">What systems/networks are explicitly excluded and why?</span>
+                </label>
+                <textarea id="outOfScope" placeholder="List systems that are excluded from the boundary and justification (e.g., separate guest network, personal devices, isolated production systems)..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 5: Data Flow -->
+        <div class="section">
+            <h2>5. Data Flow & Processing</h2>
+            <p class="section-description">How CUI moves through and is processed by the system</p>
+            
+            <div class="form-group">
+                <label for="dataIngress">Data Ingress
+                    <span class="prompt">How does CUI enter the system? (user upload, API, email, partner transfers, etc.)</span>
+                </label>
+                <textarea id="dataIngress" placeholder="Describe all methods by which CUI enters the system..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="dataProcessing">Data Processing & Storage
+                    <span class="prompt">How is CUI processed, transformed, and stored within the system?</span>
+                </label>
+                <textarea id="dataProcessing" placeholder="Describe data processing workflows, storage locations, encryption methods, retention policies..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="dataEgress">Data Egress
+                    <span class="prompt">How does CUI leave the system? (downloads, reports, API responses, partner sharing)</span>
+                </label>
+                <textarea id="dataEgress" placeholder="Describe all methods by which CUI exits the system and associated controls..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 6: Users & Access -->
+        <div class="section">
+            <h2>6. User Types & Access Control</h2>
+            <p class="section-description">Who uses the system and how access is managed</p>
+            
+            <div class="form-group">
+                <label for="userTypes">User Types & Roles
+                    <span class="prompt">What are the different user categories and their access levels?</span>
+                </label>
+                <textarea id="userTypes" class="large" placeholder="List user types (e.g., employees, contractors, admins, vendors) and their role-based access levels..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="accessControls">Access Control Mechanisms
+                    <span class="prompt">How is access authenticated and authorized?</span>
+                </label>
+                <textarea id="accessControls" placeholder="Describe authentication methods (MFA, SSO, etc.), authorization model (RBAC, least privilege), account provisioning/deprovisioning processes..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="privilegedAccess">Privileged Access Management
+                    <span class="prompt">How are administrative and privileged accounts managed?</span>
+                </label>
+                <textarea id="privilegedAccess" placeholder="Describe privileged account controls, separation of duties, admin activity monitoring..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 7: Interconnections -->
+        <div class="section">
+            <h2>7. System Interconnections & External Services</h2>
+            <p class="section-description">External systems and third-party services</p>
+            
+            <div class="form-group">
+                <label for="interconnections">External System Connections
+                    <span class="prompt">What other systems does this system connect to? (APIs, databases, partner systems)</span>
+                </label>
+                <textarea id="interconnections" class="large" placeholder="List all external system connections, their purpose, connection method, and security controls..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="thirdPartyServices">Third-Party Services
+                    <span class="prompt">What cloud services, SaaS applications, or managed services are used?</span>
+                </label>
+                <textarea id="thirdPartyServices" placeholder="List third-party services (e.g., AWS, Azure, Google Workspace), their role, and how CUI flow is controlled..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 8: Security Controls -->
+        <div class="section">
+            <h2>8. Security Controls Implementation</h2>
+            <p class="section-description">High-level overview of how security controls are implemented</p>
+            
+            <div class="form-group">
+                <label for="accessControlImpl">Access Control (AC)
+                    <span class="prompt">How are AC controls implemented? (authentication, authorization, least privilege, session management)</span>
+                </label>
+                <textarea id="accessControlImpl" class="large" placeholder="Describe implementation of access control requirements..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="auditImpl">Audit & Accountability (AU)
+                    <span class="prompt">How are audit/logging controls implemented?</span>
+                </label>
+                <textarea id="auditImpl" placeholder="Describe logging, monitoring, SIEM/log aggregation, log retention, audit review processes..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="configMgmt">Configuration Management (CM)
+                    <span class="prompt">How is system configuration managed and controlled?</span>
+                </label>
+                <textarea id="configMgmt" placeholder="Describe baseline configurations, change control processes, configuration monitoring..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="identificationAuth">Identification & Authentication (IA)
+                    <span class="prompt">How are users and devices identified and authenticated?</span>
+                </label>
+                <textarea id="identificationAuth" placeholder="Describe MFA implementation, password policies, device authentication..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="incidentResponse">Incident Response (IR)
+                    <span class="prompt">How are security incidents detected and responded to?</span>
+                </label>
+                <textarea id="incidentResponse" placeholder="Describe incident detection capabilities, response procedures, reporting, tracking..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="maintenance">Maintenance (MA)
+                    <span class="prompt">How is system maintenance controlled and logged?</span>
+                </label>
+                <textarea id="maintenance" placeholder="Describe maintenance procedures, tools used, access controls for maintenance activities..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="mediaProtection">Media Protection (MP)
+                    <span class="prompt">How is media protected and sanitized?</span>
+                </label>
+                <textarea id="mediaProtection" placeholder="Describe media handling, marking, storage, transport, and sanitization procedures..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="physicalProtection">Physical Protection (PE)
+                    <span class="prompt">What physical security controls are in place?</span>
+                </label>
+                <textarea id="physicalProtection" placeholder="Describe physical access controls, visitor management, environmental controls (for on-premises components)..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="riskAssessment">Risk Assessment (RA)
+                    <span class="prompt">How are risks identified and assessed?</span>
+                </label>
+                <textarea id="riskAssessment" placeholder="Describe risk assessment processes, vulnerability scanning, penetration testing..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="securityAssessment">Security Assessment (CA)
+                    <span class="prompt">How is security continuously assessed?</span>
+                </label>
+                <textarea id="securityAssessment" placeholder="Describe continuous monitoring, security testing, assessment processes, POA&M management..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="systemComms">System & Communications Protection (SC)
+                    <span class="prompt">How are systems and communications protected?</span>
+                </label>
+                <textarea id="systemComms" placeholder="Describe boundary protection, encryption (in transit/at rest), network segmentation, public access controls..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="systemIntegrity">System & Information Integrity (SI)
+                    <span class="prompt">How is system/data integrity maintained?</span>
+                </label>
+                <textarea id="systemIntegrity" placeholder="Describe malware protection, patch management, input validation, error handling, monitoring for integrity violations..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 9: Continuous Monitoring -->
+        <div class="section">
+            <h2>9. Continuous Monitoring Strategy</h2>
+            <p class="section-description">Ongoing security monitoring and assessment approach</p>
+            
+            <div class="form-group">
+                <label for="monitoringTools">Monitoring Tools & Technologies
+                    <span class="prompt">What tools are used for continuous monitoring?</span>
+                </label>
+                <textarea id="monitoringTools" placeholder="List SIEM, vulnerability scanners, EDR, log aggregation tools, security analytics platforms..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="monitoringActivities">Monitoring Activities
+                    <span class="prompt">What specific activities are performed and at what frequency?</span>
+                </label>
+                <textarea id="monitoringActivities" class="large" placeholder="Describe ongoing assessments: vulnerability scans (frequency), log review (frequency), security control testing, configuration monitoring..."></textarea>
+            </div>
+        </div>
+
+        <!-- Section 10: Additional Information -->
+        <div class="section">
+            <h2>10. Additional Information</h2>
+            <p class="section-description">Any other relevant details</p>
+            
+            <div class="form-group">
+                <label for="dependencies">System Dependencies
+                    <span class="prompt">What external dependencies exist? (IT services, utilities, suppliers)</span>
+                </label>
+                <textarea id="dependencies" placeholder="Describe critical dependencies like internet connectivity, power, HVAC, third-party services..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="additionalNotes">Additional Notes
+                    <span class="prompt">Any other relevant information not captured above</span>
+                </label>
+                <textarea id="additionalNotes" placeholder="Add any additional context, special considerations, or information..."></textarea>
+            </div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="output-section">
+            <h2>Generated SSP Output</h2>
+            <div class="output-content" id="outputContent">
+Click "Generate SSP Output" to create your formatted System Security Plan text...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateOutput() {
+            const output = `SYSTEM SECURITY PLAN
+${'='.repeat(80)}
+
+1. SYSTEM IDENTIFICATION
+${'-'.repeat(80)}
+System Name: ${getValue('systemName')}
+System Acronym: ${getValue('systemAcronym')}
+Target CMMC Level: ${getValue('cmcmLevel')}
+System Owner: ${getValue('systemOwner')}
+
+
+2. SYSTEM DESCRIPTION & PURPOSE
+${'-'.repeat(80)}
+
+2.1 Business Purpose
+${getValue('businessPurpose')}
+
+2.2 System Capabilities
+${getValue('systemCapabilities')}
+
+2.3 Controlled Unclassified Information (CUI) Handled
+${getValue('cuiHandled')}
+
+
+3. SYSTEM ENVIRONMENT & ARCHITECTURE
+${'-'.repeat(80)}
+
+3.1 Hosting Model
+${getValue('hostingModel')}
+
+3.2 Major System Components
+${getValue('majorComponents')}
+
+3.3 Operating Systems & Platforms
+${getValue('operatingSystems')}
+
+3.4 Network Architecture
+${getValue('networkArchitecture')}
+
+
+4. SYSTEM BOUNDARIES & SCOPE
+${'-'.repeat(80)}
+
+4.1 Authorization Boundary
+${getValue('authBoundary')}
+
+4.2 Out of Scope
+${getValue('outOfScope')}
+
+
+5. DATA FLOW & PROCESSING
+${'-'.repeat(80)}
+
+5.1 Data Ingress
+${getValue('dataIngress')}
+
+5.2 Data Processing & Storage
+${getValue('dataProcessing')}
+
+5.3 Data Egress
+${getValue('dataEgress')}
+
+
+6. USER TYPES & ACCESS CONTROL
+${'-'.repeat(80)}
+
+6.1 User Types & Roles
+${getValue('userTypes')}
+
+6.2 Access Control Mechanisms
+${getValue('accessControls')}
+
+6.3 Privileged Access Management
+${getValue('privilegedAccess')}
+
+
+7. SYSTEM INTERCONNECTIONS & EXTERNAL SERVICES
+${'-'.repeat(80)}
+
+7.1 External System Connections
+${getValue('interconnections')}
+
+7.2 Third-Party Services
+${getValue('thirdPartyServices')}
+
+
+8. SECURITY CONTROLS IMPLEMENTATION
+${'-'.repeat(80)}
+
+8.1 Access Control (AC)
+${getValue('accessControlImpl')}
+
+8.2 Audit & Accountability (AU)
+${getValue('auditImpl')}
+
+8.3 Configuration Management (CM)
+${getValue('configMgmt')}
+
+8.4 Identification & Authentication (IA)
+${getValue('identificationAuth')}
+
+8.5 Incident Response (IR)
+${getValue('incidentResponse')}
+
+8.6 Maintenance (MA)
+${getValue('maintenance')}
+
+8.7 Media Protection (MP)
+${getValue('mediaProtection')}
+
+8.8 Physical Protection (PE)
+${getValue('physicalProtection')}
+
+8.9 Risk Assessment (RA)
+${getValue('riskAssessment')}
+
+8.10 Security Assessment (CA)
+${getValue('securityAssessment')}
+
+8.11 System & Communications Protection (SC)
+${getValue('systemComms')}
+
+8.12 System & Information Integrity (SI)
+${getValue('systemIntegrity')}
+
+
+9. CONTINUOUS MONITORING STRATEGY
+${'-'.repeat(80)}
+
+9.1 Monitoring Tools & Technologies
+${getValue('monitoringTools')}
+
+9.2 Monitoring Activities
+${getValue('monitoringActivities')}
+
+
+10. ADDITIONAL INFORMATION
+${'-'.repeat(80)}
+
+10.1 System Dependencies
+${getValue('dependencies')}
+
+10.2 Additional Notes
+${getValue('additionalNotes')}
+
+
+${'='.repeat(80)}
+End of System Security Plan
+`;
+            
+            document.getElementById('outputContent').textContent = output;
+        }
+        
+        function getValue(id) {
+            const value = document.getElementById(id).value.trim();
+            return value || '[Not provided]';
+        }
+        
+        function copyToClipboard() {
+            const output = document.getElementById('outputContent').textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                alert('SSP copied to clipboard!');
+            });
+        }
+        
+        function downloadOutput() {
+            const output = document.getElementById('outputContent').textContent;
+            const clientName = document.getElementById('clientName').value.trim() || 'system';
+            const filename = `SSP_${clientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+            
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function saveClient() {
+            const clientName = document.getElementById('clientName').value.trim();
+            if (!clientName) {
+                alert('Please enter a client name first');
+                return;
+            }
+            
+            const formData = {};
+            const inputs = document.querySelectorAll('input[type="text"], textarea');
+            inputs.forEach(input => {
+                if (input.id !== 'clientName') {
+                    formData[input.id] = input.value;
+                }
+            });
+            
+            localStorage.setItem(`ssp_${clientName}`, JSON.stringify(formData));
+            
+            const alert = document.getElementById('successAlert');
+            alert.classList.remove('hidden');
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 3000);
+        }
+        
+        function loadClient() {
+            const clientName = document.getElementById('clientName').value.trim();
+            if (!clientName) {
+                alert('Please enter a client name first');
+                return;
+            }
+            
+            const savedData = localStorage.getItem(`ssp_${clientName}`);
+            if (!savedData) {
+                alert('No saved data found for this client');
+                return;
+            }
+            
+            const formData = JSON.parse(savedData);
+            Object.keys(formData).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = formData[key];
+                }
+            });
+            
+            alert('Client data loaded successfully!');
+        }
+        
+        function clearForm() {
+            if (confirm('Are you sure you want to clear all fields?')) {
+                const inputs = document.querySelectorAll('input[type="text"], textarea');
+                inputs.forEach(input => {
+                    if (input.id !== 'clientName') {
+                        input.value = '';
+                    }
+                });
+                document.getElementById('outputContent').textContent = 'Click "Generate SSP Output" to create your formatted System Security Plan text...';
+            }
+        }
+    </script>
+</body>
+</html>
